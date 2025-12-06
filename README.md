@@ -28,4 +28,4 @@ Restart ComfyUI after installation.
 
 <img src="https://github.com/user-attachments/assets/0bd62054-c061-4b87-8bea-bbebafe91bf1" width="700" />
 
-An exmple workflow (for Z-image turbo) can be found [here](https://github.com/BigStationW/ComfyUi-ConditioningNoiseInjection/blob/main/workflow_Z-image_turbo.json).
+An example workflow (for Z-image turbo) can be found [here](https://github.com/BigStationW/ComfyUi-ConditioningNoiseInjection/blob/main/workflow_Z-image_turbo.json).
