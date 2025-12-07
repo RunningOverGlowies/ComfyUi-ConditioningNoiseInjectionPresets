@@ -1,3 +1,4 @@
+<img width="495" height="374" alt="node" src="https://github.com/user-attachments/assets/52275088-94c6-4692-9576-6ffe84919930" />
 # ComfyUi-ConditioningNoiseInjectionPresets
 
 A fork of [ComfyUI](https://github.com/comfyanonymous/ComfyUI) that adds a node with presets dropdown to simulate chaining of the ConditioningNoiseInjection node. I was getting interesting results using certain thresholds and strengths so I quickly vibed up this preset node. Here is an explanation of how the new Preset node functions.
