@@ -4,7 +4,8 @@ import { api } from "../../scripts/api.js";
 // List of node class types to target
 const TARGET_NODES = [
     "ConditioningNoiseInjection", 
-    "ConditioningNoiseInjectionPresets"
+    "ConditioningNoiseInjectionPresets",
+	"ConditioningNoiseInjectionDynamic"
 ];
 
 function findWorkflowParams(app) {
