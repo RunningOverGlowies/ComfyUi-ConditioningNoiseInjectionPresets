@@ -126,20 +126,54 @@ class ConditioningNoiseInjectionPresets:
     # Format: "Name": [(Threshold, Strength), (Threshold, Strength), ...]
     # --------------------------------------------------------------------------
     RECIPES = {
-        # --- 9 STEP MODEL RECIPES ---
-        "9-Step: Composition Kicker (Chaos Start)": [(0.35, 3.0), (0.12, 15.0)],
-        "9-Step: Texture Fader (High Detail)":      [(0.45, 2.0), (0.23, 4.0)],
-        "9-Step: Negative Scrambler (Fix Poses)":   [(0.55, 2.0), (0.15, 5.0)],
-        "9-Step: The Steep Cliff (Cleanest)":       [(0.45, 1.0), (0.34, 3.0), (0.23, 5.0), (0.12, 8.0)],
-        "9-Step: The Plateau (Stubborn Prompts)":   [(0.45, 1.0), (0.34, 2.0), (0.23, 6.0), (0.23, 6.0)],
-        
-        # --- 12 STEP MODEL RECIPES ---
-        "12-Step: Dream Shifter (Variation)":       [(0.35, 2.0), (0.09, 12.0)],
-        "12-Step: Grit Gradient (Texture)":         [(0.42, 3.0), (0.18, 5.0)],
-        "12-Step: Logarithmic Decay (Natural)":     [(0.45, 1.0), (0.26, 3.0), (0.10, 8.0)],
-        "12-Step: Hallucination Engine (Surreal)":  [(0.55, 2.0), (0.35, 4.0), (0.18, 6.0)],
-        "12-Step: The Golden Curve (Best General)": [(0.51, 1.0), (0.34, 2.0), (0.18, 4.0), (0.09, 8.0)],
-        "12-Step: The Delayed Drop (Painterly)":    [(0.51, 2.0), (0.42, 2.0), (0.26, 4.0), (0.17, 6.0)],
+        "Disabled": [],
+        # ======================================================================
+        # TIER 1: SUBTLE & POLISH (Safe)
+        # Low strength, mostly for texture or micro-details.
+        # ======================================================================
+        "🟢 9-Step: Cinematic Haze (Texture Only)":    [(0.55, 0.5), (0.44, 0.5), (0.33, 1.0)],
+        "🟢 9-Step: Texture Fader (High Detail)":      [(0.45, 2.0), (0.23, 4.0)],
+        "🟢 9-Step: The Fluid Half":                   [(0.50, 1.5), (0.22, 3.0)],
+        "🟢 12-Step: Portrait Skin Saver":             [(0.34, 0.5), (0.26, 1.0), (0.17, 3.0), (0.09, 5.0)],
+        "🟢 12-Step: The Perfect Slope":               [(0.34, 1.0), (0.26, 1.0), (0.17, 1.0), (0.09, 1.0)],
+
+        # ======================================================================
+        # TIER 2: BALANCED (Standard)
+        # Good initial kick to set composition, but cleans up nicely.
+        # ======================================================================
+        "🟡 9-Step: The Steep Cliff (Cleanest)":       [(0.45, 1.0), (0.34, 3.0), (0.23, 5.0), (0.12, 8.0)],
+        "🟡 9-Step: Hard Cut (Contrast)":              [(0.33, 4.0), (0.33, 2.0)],
+        "🟡 12-Step: Logarithmic Decay (Natural)":     [(0.45, 1.0), (0.26, 3.0), (0.10, 8.0)],
+        "🟡 12-Step: The Golden Curve (Best General)": [(0.51, 1.0), (0.34, 2.0), (0.18, 4.0), (0.09, 8.0)],
+
+        # ======================================================================
+        # TIER 3: STRONG & STYLISTIC (Noticeable Alteration)
+        # Heavier textures or noise that lingers longer into the generation.
+        # ======================================================================
+        "🟠 9-Step: Negative Scrambler (Fix Poses)":   [(0.55, 2.0), (0.15, 5.0)],
+        "🟠 9-Step: Painterly Softness (Late Noise)":  [(0.66, 1.0), (0.33, 2.0)],
+        "🟠 12-Step: Grit Gradient (Texture)":         [(0.42, 3.0), (0.18, 5.0)],
+        "🟠 12-Step: The Delayed Drop (Painterly)":    [(0.51, 2.0), (0.42, 2.0), (0.26, 4.0), (0.17, 6.0)],
+        "🟠 12-Step: Hallucination Engine (Surreal)":  [(0.55, 2.0), (0.35, 4.0), (0.18, 6.0)],
+
+        # ======================================================================
+        # TIER 4: HEAVY DISTORTION (Major Changes)
+        # Sustained high noise or long durations. Changes the prompt significantly.
+        # ======================================================================
+        "🔴 9-Step: Detail Scrambler":                 [(0.34, 2.0), (0.23, 4.0), (0.23, 4.0)],
+        "🔴 9-Step: The Plateau (Stubborn Prompts)":   [(0.45, 1.0), (0.34, 2.0), (0.23, 6.0), (0.23, 6.0)],
+        "🔴 12-Step: Surreal Melt":                    [(0.51, 2.0), (0.51, 2.0)],
+        "🔴 12-Step: Deep Fryer":                      [(0.25, 4.0), (0.25, 4.0)],
+
+        # ======================================================================
+        # TIER 5: NUCLEAR (Chaos & Hallucinations)
+        # Massive strength spikes. Expect aliens, glitches, and wild geometry.
+        # ======================================================================
+        "🤡 9-Step: Composition Kicker (Chaos Start)": [(0.35, 3.0), (0.12, 15.0)],
+        "🤡 9-Step: The Nuclear Option":               [(0.12, 25.0), (0.23, 2.0)],
+        "🤡 12-Step: The Hiccup":                      [(0.17, 10.0), (0.25, 1.0)],
+        "🤡 12-Step: Dream Shifter (Variation)":       [(0.35, 2.0), (0.09, 12.0)],
+        "🤡 12-Step: Composition Lock":                [(0.17, 10.0), (0.09, 5.0)],
     }
 
     @classmethod
