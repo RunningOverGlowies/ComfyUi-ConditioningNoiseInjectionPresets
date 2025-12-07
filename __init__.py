@@ -1,4 +1,5 @@
 import torch
+import math
 
 # ============================
 # PRINT TOGGLE
@@ -192,7 +193,8 @@ class ConditioningNoiseInjectionPresets:
             }
         }
 
-    RETURN_TYPES = ("CONDITIONING",)
+    RETURN_TYPES = ("CONDITIONING", "INT")
+    RETURN_NAMES = ("conditioning", "steps_out")
     FUNCTION = "inject_noise_preset"
     CATEGORY = "advanced/conditioning"
 
@@ -276,17 +278,173 @@ class ConditioningNoiseInjectionPresets:
                     else:
                         c_out.append([processing_tensor, new_dict])
 
-        return (c_out, )
+        steps_out = 0
+        if "9-Step" in preset:
+            steps_out = 9
+        elif "12-Step" in preset:
+            steps_out = 12
+            
+        return (c_out, steps_out, )
 
-# MAPPINGS
+class ConditioningNoiseInjectionDynamic:
+    
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "conditioning": ("CONDITIONING",),
+                "steps": ("INT", {"default": 12, "min": 1, "max": 100, "step": 1, "tooltip": "Total steps in your KSampler"}),
+                "num_segments": ("INT", {"default": 3, "min": 1, "max": 10, "step": 1, "tooltip": "How many 'simulated nodes' to chain"}),
+                "chaos_factor": ("FLOAT", {"default": 0.5, "min": 0.0, "max": 1.0, "step": 0.01, "tooltip": "0.0 = Subtle Polish, 1.0 = Nuclear Chaos"}),
+                "strength_scale": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 2.0, "step": 0.1, "tooltip": "Global multiplier"}),
+            },
+            "hidden": {
+                "unique_id": "UNIQUE_ID",
+                "extra_pnginfo": "EXTRA_PNGINFO",
+                "seed_from_js": ("INT", {"default": 0}),
+                "batch_size_from_js": ("INT", {"default": 1}),
+            }
+        }
+
+    RETURN_TYPES = ("CONDITIONING", "INT")
+    RETURN_NAMES = ("conditioning", "steps_out")
+    FUNCTION = "inject_dynamic"
+    CATEGORY = "advanced/conditioning"
+
+    @classmethod
+    def IS_CHANGED(s, conditioning, steps, num_segments, chaos_factor, strength_scale, seed_from_js=0, batch_size_from_js=1, **kwargs):
+        # Include all curve parameters in hash
+        return f"{seed_from_js}_{batch_size_from_js}_{steps}_{num_segments}_{chaos_factor}_{strength_scale}"
+
+    def inject_dynamic(self, conditioning, steps, num_segments, chaos_factor, strength_scale, seed_from_js=0, batch_size_from_js=1, **kwargs):
+        
+        # ======================================================================
+        # 1. PROCEDURAL CURVE GENERATION
+        # ======================================================================
+        
+        # Calculate single step duration
+        step_len = 1.0 / max(1, steps)
+        
+        # A. Determine Max Duration (How deep into generation we go)
+        # Low Chaos (0.0) -> Lasts ~15% of steps (or min 2 steps)
+        # High Chaos (1.0) -> Lasts ~60% of steps
+        min_duration = step_len * 1.5 
+        max_duration = 0.60
+        target_duration = min_duration + (max_duration - min_duration) * chaos_factor
+        
+        # Clamp duration to 1.0
+        target_duration = min(target_duration, 1.0)
+
+        # B. Determine Peak Strength (The strength of the first segment)
+        # Low Chaos (0.0) -> 2.0
+        # High Chaos (1.0) -> 20.0
+        min_peak = 2.0
+        max_peak = 20.0
+        peak_strength = min_peak + (max_peak - min_peak) * chaos_factor
+
+        # C. Generate Segments
+        # We slice the 'target_duration' into 'num_segments' chunks.
+        # We linearly decay the strength from Peak -> Low.
+        
+        chunk_size = target_duration / num_segments
+        segments = [] # List of (start_time, end_time, strength_val)
+        
+        current_time = 0.0
+        
+        for i in range(num_segments):
+            start = current_time
+            end = current_time + chunk_size
+            
+            # Calculate Strength for this chunk
+            # Simple Linear Decay formula:
+            # Segment 0 = Peak
+            # Segment Last = ~10% of Peak
+            progress = i / max(1, (num_segments - 1)) if num_segments > 1 else 0.0
+            
+            # Curve: Linear decay
+            segment_strength = peak_strength * (1.0 - (progress * 0.9))
+            
+            # Apply Global Scale
+            final_strength = segment_strength * strength_scale
+            
+            segments.append((start, end, final_strength))
+            current_time = end
+
+        # ======================================================================
+        # 2. NOISE INJECTION LOGIC (Flattened Timeline)
+        # ======================================================================
+        
+        c_out = []
+
+        def get_time_intersection(params, limit_start, limit_end):
+            old_start = params.get("start_percent", 0.0)
+            old_end = params.get("end_percent", 1.0)
+            new_start = max(old_start, limit_start)
+            new_end = min(old_end, limit_end)
+            return new_start, new_end
+
+        g = torch.Generator(device="cpu")
+        g.manual_seed(seed_from_js)
+
+        for t in conditioning:
+            original_tensor = t[0]
+            original_dict = t[1].copy()
+
+            # Batch Expansion
+            current_batch_count = original_tensor.shape[0]
+            target_batch_count = max(current_batch_count, batch_size_from_js)
+            processing_tensor = original_tensor
+            if current_batch_count == 1 and target_batch_count > 1:
+                processing_tensor = original_tensor.repeat(target_batch_count, 1, 1)
+
+            # Generate Noise (Once per conditioning item)
+            noise = torch.randn(processing_tensor.size(), generator=g, device="cpu").to(processing_tensor.device, dtype=processing_tensor.dtype)
+
+            # --- Apply Segments ---
+            # Any gap between segments (e.g., after the last segment) needs to be filled with Clean conditioning
+            
+            last_end_time = 0.0
+            
+            # 1. Apply Noisy Segments
+            for (seg_start, seg_end, str_val) in segments:
+                
+                # Verify we aren't overlapping floating point weirdness
+                if seg_start >= 1.0: break
+                
+                valid_start, valid_end = get_time_intersection(original_dict, seg_start, seg_end)
+                
+                if valid_start < valid_end:
+                    new_dict = original_dict.copy()
+                    new_dict["start_percent"] = valid_start
+                    new_dict["end_percent"] = valid_end
+                    
+                    noisy_tensor = processing_tensor + (noise * str_val)
+                    c_out.append([noisy_tensor, new_dict])
+                    
+                last_end_time = max(last_end_time, seg_end)
+
+            # 2. Apply Clean Tail (The rest of generation)
+            # If our segments ended at 0.4, we need clean from 0.4 to 1.0
+            valid_start, valid_end = get_time_intersection(original_dict, last_end_time, 1.0)
+            if valid_start < valid_end:
+                new_dict = original_dict.copy()
+                new_dict["start_percent"] = valid_start
+                new_dict["end_percent"] = valid_end
+                c_out.append([processing_tensor, new_dict])
+
+        return (c_out, steps, )
+
+# MAPPINGS UPDATE
 NODE_CLASS_MAPPINGS = {
-    "ConditioningNoiseInjection": ConditioningNoiseInjection, # Keep old one if needed
-    "ConditioningNoiseInjectionPresets": ConditioningNoiseInjectionPresets
+    "ConditioningNoiseInjection": ConditioningNoiseInjection,
+    "ConditioningNoiseInjectionPresets": ConditioningNoiseInjectionPresets,
+    "ConditioningNoiseInjectionDynamic": ConditioningNoiseInjectionDynamic
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "ConditioningNoiseInjection": "Conditioning Noise Injection (Manual)",
-    "ConditioningNoiseInjectionPresets": "Conditioning Noise Injection (Presets)"
+    "ConditioningNoiseInjectionPresets": "Conditioning Noise Injection (Presets)",
+    "ConditioningNoiseInjectionDynamic": "Conditioning Noise Injection (Dynamic)"
 }
 
 WEB_DIRECTORY = "./js"
