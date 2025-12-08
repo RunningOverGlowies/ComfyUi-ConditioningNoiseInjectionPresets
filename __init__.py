@@ -293,10 +293,11 @@ class ConditioningNoiseInjectionDynamic:
         return {
             "required": {
                 "conditioning": ("CONDITIONING",),
-                "steps": ("INT", {"default": 12, "min": 1, "max": 100, "step": 1, "tooltip": "Total steps in your KSampler"}),
+                "steps": ("INT", {"default": 9, "min": 1, "max": 100, "step": 1, "tooltip": "Total steps in your KSampler"}),
                 "num_segments": ("INT", {"default": 3, "min": 1, "max": 10, "step": 1, "tooltip": "How many 'simulated nodes' to chain"}),
                 "chaos_factor": ("FLOAT", {"default": 0.5, "min": 0.0, "max": 1.0, "step": 0.01, "tooltip": "0.0 = Subtle Polish, 1.0 = Nuclear Chaos"}),
                 "strength_scale": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 2.0, "step": 0.1, "tooltip": "Global multiplier"}),
+                "show_graph": ("BOOLEAN", {"default": False}),
             },
             "hidden": {
                 "unique_id": "UNIQUE_ID",
@@ -312,9 +313,9 @@ class ConditioningNoiseInjectionDynamic:
     CATEGORY = "advanced/conditioning"
 
     @classmethod
-    def IS_CHANGED(s, conditioning, steps, num_segments, chaos_factor, strength_scale, seed_from_js=0, batch_size_from_js=1, **kwargs):
+    def IS_CHANGED(s, conditioning, steps, num_segments, chaos_factor, strength_scale, show_graph, seed_from_js=0, batch_size_from_js=1, **kwargs):
         # Include all curve parameters in hash
-        return f"{seed_from_js}_{batch_size_from_js}_{steps}_{num_segments}_{chaos_factor}_{strength_scale}"
+        return f"{seed_from_js}_{batch_size_from_js}_{steps}_{num_segments}_{chaos_factor}_{strength_scale}_{show_graph}"
 
     def inject_dynamic(self, conditioning, steps, num_segments, chaos_factor, strength_scale, seed_from_js=0, batch_size_from_js=1, **kwargs):
         
@@ -438,13 +439,13 @@ class ConditioningNoiseInjectionDynamic:
 NODE_CLASS_MAPPINGS = {
     "ConditioningNoiseInjection": ConditioningNoiseInjection,
     "ConditioningNoiseInjectionPresets": ConditioningNoiseInjectionPresets,
-    "ConditioningNoiseInjectionDynamic": ConditioningNoiseInjectionDynamic
+    "ConditioningNoiseInjectionDynamic": ConditioningNoiseInjectionDynamic,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "ConditioningNoiseInjection": "Conditioning Noise Injection (Manual)",
     "ConditioningNoiseInjectionPresets": "Conditioning Noise Injection (Presets)",
-    "ConditioningNoiseInjectionDynamic": "Conditioning Noise Injection (Dynamic)"
+    "ConditioningNoiseInjectionDynamic": "Conditioning Noise Injection (Dynamic)",
 }
 
 WEB_DIRECTORY = "./js"
