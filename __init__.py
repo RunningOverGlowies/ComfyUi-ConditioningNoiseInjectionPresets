@@ -193,8 +193,8 @@ class ConditioningNoiseInjectionPresets:
             }
         }
 
-    RETURN_TYPES = ("CONDITIONING", "INT")
-    RETURN_NAMES = ("conditioning", "steps_out")
+    RETURN_TYPES = ("CONDITIONING")
+    RETURN_NAMES = ("conditioning")
     FUNCTION = "inject_noise_preset"
     CATEGORY = "advanced/conditioning"
 
