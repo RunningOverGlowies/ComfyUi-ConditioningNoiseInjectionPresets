@@ -1,4 +1,4 @@
-# ComfyUi-ConditioningNoiseInjectionPresets
+# ComfyUi-ConditioningNoiseInjectionPlus
 
 **Advanced Conditioning Noise Injection for ComfyUI.**
 
