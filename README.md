@@ -12,9 +12,11 @@ This extension provides tools to inject controlled random noise into your Positi
 ## 1. The Dynamic Node
 **`ConditioningNoiseInjectionDynamic`**
 
-<img width="286" height="323" alt="node2" src="https://github.com/user-attachments/assets/7d5a4d40-3808-42d5-ad9d-9289f24e4688" />
+<img width="362" height="390" alt="t" src="https://github.com/user-attachments/assets/4392224f-3baf-489f-a772-432d91c7bec8" />
 
-This node procedurally generates a custom decay curve based on your inputs. Enable the `show_graph` toggle to render a real-time plot of your noise. The graph updates as you adjust sliders, showing how the noise strength interacts with your generation steps (vertical grid lines represent steps). The graph includes a green box indicating a 'Safe Zone' (Strength < 16.45, Duration < 37%). In my limited experimentation keeping your curve within this box generally ensures coherent results (this is entirely subject, your mileage may vary).
+This node procedurally generates a custom decay curve based on your inputs. Enable the `show_graph` toggle to render a real-time plot of your noise. The graph updates as you adjust sliders, showing how the noise strength interacts with your generation steps (vertical grid lines represent steps). 
+
+The graph includes a green box indicating a 'Safe Zone' (Strength < 16.45, Duration < 37%). In my limited experimentation keeping your curve within this box generally ensures coherent results (this is entirely subject, your mileage may vary).
 
 ### The "Chaos Factor"
 The **Chaos Factor** slider controls two variables simultaneously to maintain mathematical coherence:
