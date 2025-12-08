@@ -2,9 +2,6 @@
 
 **Advanced Conditioning Noise Injection for ComfyUI.**
 
-<img width="719" height="657" alt="node" src="https://github.com/user-attachments/assets/b207b65a-02f2-49b5-af94-f7c33c18a2eb" />
-
-
 I was having great success with chaining multiple [ConditioningNoiseInjection](https://github.com/BigStationW/ComfyUi-ConditioningNoiseInjection) nodes for seed variance so I quickly vibed these nodes to simulate complex chaining of noise injection. 
 
 This extension provides tools to inject controlled random noise into your Positive or Negative conditioning. This creates variations in texture, composition, and seed variance without changing your core prompt. 
@@ -13,21 +10,12 @@ Originally, achieving these gradients required chaining multiple nodes together 
 
 ---
 
-## 1. The Presets Node
-**`ConditioningNoiseInjectionPresets`**
-
-Best for users who want curated, "tried-and-true" effects without tweaking math.
-
-*   **Curated Recipes:** Includes specific noise schedules tuned for **9-step** (Turbo/Lightning) and **12-step** workflows.
-*   **Vibe-Based Selection:** Presets range from "Subtle Polish" (texture enhancement) to "Nuclear Chaos" (major compositional hallucinations).
-*   **Flattened Timeline:** The node analyzes the recipe and slices the generation timeline into distinct segments, calculating the perfect summed strength for every micro-step of the generation.
-
----
-
-## 2. The Dynamic Node
+## 1. The Dynamic Node
 **`ConditioningNoiseInjectionDynamic`**
 
-Best for users who want total control. This node procedurally generates a custom decay curve based on your inputs.
+<img width="286" height="323" alt="node2" src="https://github.com/user-attachments/assets/7d5a4d40-3808-42d5-ad9d-9289f24e4688" />
+
+Best for users who want total control. This node procedurally generates a custom decay curve based on your inputs. Enable the `show_graph` toggle to render a real-time plot of your noise schedule directly on the node. The graph updates instantly as you adjust sliders, showing exactly how the noise strength interacts with your generation steps (vertical grid lines represent steps).
 
 ### The "Chaos Factor"
 Instead of setting manual thresholds, you use the **Chaos Factor** slider. This controls two variables simultaneously to maintain mathematical coherence:
@@ -46,3 +34,19 @@ Instead of setting manual thresholds, you use the **Chaos Factor** slider. This 
     *   *Low (2):* Creates a sharp, high-contrast "Step Down" effect.
     *   *High (5+):* Creates a smooth, natural gradient decay.
 *   **Strength Scale:** A global multiplier. Set to `0.0` to bypass the node.
+*  **Show Graph:** Shows/hide the graph.
+
+---
+
+## 2. The Presets Node
+**`ConditioningNoiseInjectionPresets`**
+
+<img width="447" height="632" alt="node" src="https://github.com/user-attachments/assets/055aeafd-4be6-43f9-99c2-fb04a1ace708" />
+
+Best for users who want curated, "tried-and-true" effects without tweaking math.
+
+*   **Curated Recipes:** Includes specific noise schedules tuned for **9-step** (Turbo/Lightning) and **12-step** workflows.
+*   **Vibe-Based Selection:** Presets range from "Subtle Polish" (texture enhancement) to "Nuclear Chaos" (major compositional hallucinations).
+
+---
+
