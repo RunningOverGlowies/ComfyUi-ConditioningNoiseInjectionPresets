@@ -1,0 +1,14 @@
+[project]
+name = "comfyui-promptutils"
+description = "This extension provides tools to inject controlled random noise into your Positive or Negative conditioning."
+version = "1.0.0"
+license = {file = "LICENSE"}
+
+[project.urls]
+Repository = "https://github.com/RunningOverGlowies/ComfyUi-ConditioningNoiseInjectionPlus"
+#  Used by Comfy Registry https://comfyregistry.org
+
+[tool.comfy]
+PublisherId = ""
+DisplayName = "ComfyUI-ConditioningNoiseInjectionPlus"
+Icon = ""
