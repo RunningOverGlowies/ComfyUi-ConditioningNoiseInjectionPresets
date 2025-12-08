@@ -134,7 +134,7 @@ class ConditioningNoiseInjectionPresets:
         # ======================================================================
         "🟢 Cinematic Haze (Texture Only)":    [(0.55, 0.5), (0.44, 0.5), (0.33, 1.0)],
         "🟢 Texture Fader (High Detail)":      [(0.45, 2.0), (0.23, 4.0)],
-        "🟢 9The Fluid Half":                   [(0.50, 1.5), (0.22, 3.0)],
+        "🟢 The Fluid Half":                   [(0.50, 1.5), (0.22, 3.0)],
         "🟢 Portrait Skin Saver":             [(0.34, 0.5), (0.26, 1.0), (0.17, 3.0), (0.09, 5.0)],
         "🟢 The Perfect Slope":               [(0.34, 1.0), (0.26, 1.0), (0.17, 1.0), (0.09, 1.0)],
 
@@ -193,8 +193,8 @@ class ConditioningNoiseInjectionPresets:
             }
         }
 
-    RETURN_TYPES = ("CONDITIONING")
-    RETURN_NAMES = ("conditioning")
+    RETURN_TYPES = ("CONDITIONING",)
+    RETURN_NAMES = ("conditioning",)
     FUNCTION = "inject_noise_preset"
     CATEGORY = "advanced/conditioning"
 
@@ -277,7 +277,7 @@ class ConditioningNoiseInjectionPresets:
                         c_out.append([noisy_tensor, new_dict])
                     else:
                         c_out.append([processing_tensor, new_dict])
-                        
+            
         return (c_out, )
 
 class ConditioningNoiseInjectionDynamic:
@@ -443,4 +443,3 @@ NODE_DISPLAY_NAME_MAPPINGS = {
 }
 
 WEB_DIRECTORY = "./js"
-
