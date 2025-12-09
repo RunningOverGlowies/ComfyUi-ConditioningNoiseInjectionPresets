@@ -1,0 +1,29 @@
+{
+    "Disabled": [],
+    "🟢 Cinematic Haze (Texture Only)":    [[0.55, 0.5], [0.44, 0.5], [0.33, 1.0]],
+    "🟢 Texture Fader (High Detail)":      [[0.45, 2.0], [0.23, 4.0]],
+    "🟢 The Fluid Half":                   [[0.50, 1.5], [0.22, 3.0]],
+    "🟢 Portrait Skin Saver":             [[0.34, 0.5], [0.26, 1.0], [0.17, 3.0], [0.09, 5.0]],
+    "🟢 The Perfect Slope":               [[0.34, 1.0], [0.26, 1.0], [0.17, 1.0], [0.09, 1.0]],
+
+    "🟡 The Steep Cliff (Cleanest)":       [[0.45, 1.0], [0.34, 3.0], [0.23, 5.0], [0.12, 8.0]],
+    "🟡 Hard Cut (Contrast)":              [[0.33, 4.0], [0.33, 2.0]],
+    "🟡 Logarithmic Decay (Natural)":     [[0.45, 1.0], [0.26, 3.0], [0.10, 8.0]],
+    "🟡 The Golden Curve (Best General)": [[0.51, 1.0], [0.34, 2.0], [0.18, 4.0], [0.09, 8.0]],
+
+    "🟠 Painterly Softness (Late Noise)":  [[0.66, 1.0], [0.33, 2.0]],
+    "🟠 Grit Gradient (Texture)":         [[0.42, 3.0], [0.18, 5.0]],
+    "🟠 The Delayed Drop (Painterly)":    [[0.51, 2.0], [0.42, 2.0], [0.26, 4.0], [0.17, 6.0]],
+    "🟠 Hallucination Engine (Surreal)":  [[0.55, 2.0], [0.35, 4.0], [0.18, 6.0]],
+
+    "🔴 Detail Scrambler":                 [[0.34, 2.0], [0.23, 4.0], [0.23, 4.0]],
+    "🔴 The Plateau (Stubborn Prompts)":   [[0.45, 1.0], [0.34, 2.0], [0.23, 6.0], [0.23, 6.0]],
+    "🔴 Surreal Melt":                    [[0.51, 2.0], [0.51, 2.0]],
+    "🔴 Deep Fryer":                      [[0.25, 4.0], [0.25, 4.0]],
+
+    "🤡 Composition Kicker (Chaos Start)": [[0.35, 3.0], [0.12, 15.0]],
+    "🤡 The Nuclear Option":               [[0.12, 25.0], [0.23, 2.0]],
+    "🤡 The Hiccup":                      [[0.17, 10.0], [0.25, 1.0]],
+    "🤡 Dream Shifter (Variation)":       [[0.35, 2.0], [0.09, 12.0]],
+    "🤡 Composition Lock":                [[0.17, 10.0], [0.09, 5.0]]
+}

@@ -9,10 +9,15 @@
         :root {
             --bg: #222;
             --panel: #333;
+            --panel-adv: #2a2a2a;
             --text: #ddd;
             --accent: #5577ff;
+            --accent-hover: #4466ee;
             --safe: rgba(0, 255, 100, 0.15);
             --safe-border: rgba(0, 255, 100, 0.5);
+            --btn-bg: #444;
+            --btn-hover: #555;
+            --warn: #ffaa00;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -39,6 +44,19 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+        }
+        .advanced-panel {
+            margin-top: 15px;
+            background: var(--panel-adv);
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            display: none; /* Hidden by default */
+        }
+        .advanced-panel.show {
+            display: block;
         }
         .graph-container {
             flex: 2;
@@ -47,7 +65,7 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            height: 400px;
+            height: 450px;
             position: relative;
         }
         .control-group {
@@ -58,6 +76,7 @@
             justify-content: space-between;
             margin-bottom: 5px;
             font-weight: bold;
+            font-size: 0.9em;
         }
         input[type="range"] {
             width: 100%;
@@ -92,6 +111,48 @@
             background: var(--safe);
             border: 1px dashed var(--safe-border);
         }
+        
+        /* BUTTONS */
+        .btn-group {
+            margin-top: auto;
+            padding-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+            color: white;
+            font-size: 0.9rem;
+        }
+        #btn-reset { background-color: var(--btn-bg); }
+        #btn-reset:hover { background-color: var(--btn-hover); }
+        
+        #btn-adv { background-color: var(--warn); color: #111; }
+        #btn-adv:hover { background-color: #eebb00; }
+        
+        #btn-export { background-color: var(--accent); }
+        #btn-export:hover { background-color: var(--accent-hover); }
+        
+        #copy-notice {
+            text-align: center;
+            font-size: 0.85em;
+            color: #888;
+            margin-top: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        #copy-notice code {
+            background: #222;
+            padding: 2px 4px;
+            border-radius: 3px;
+            color: #aaa;
+        }
     </style>
 </head>
 <body>
@@ -101,6 +162,7 @@
         <div class="controls">
             <h2>Parameters</h2>
             
+            <!-- Standard Controls -->
             <div class="control-group">
                 <label>Steps <span id="val_steps" class="val-highlight">12</span></label>
                 <input type="range" id="steps" min="4" max="50" value="12" step="1">
@@ -108,7 +170,7 @@
 
             <div class="control-group">
                 <label>Num Segments <span id="val_segments" class="val-highlight">3</span></label>
-                <input type="range" id="num_segments" min="1" max="10" value="3" step="1">
+                <input type="range" id="num_segments" min="1" max="50" value="3" step="1">
             </div>
 
             <div class="control-group">
@@ -118,7 +180,28 @@
 
             <div class="control-group">
                 <label>Strength Scale <span id="val_scale" class="val-highlight">1.0</span></label>
-                <input type="range" id="strength_scale" min="0.0" max="2.0" value="1.0" step="0.1">
+                <input type="range" id="strength_scale" min="0.0" max="2.0" value="1.0" step="0.01">
+            </div>
+
+            <!-- Experimental Panel -->
+            <button id="btn-adv" style="margin-bottom: 10px;">Toggle Advanced</button>
+            <div class="advanced-panel" id="adv-panel">
+                <div class="control-group">
+                    <label title="1.0 = Linear. >1 = Fast Drop. <1 = Fat Curve">Curvature (Bend) <span id="val_curve" class="val-highlight">1.0</span></label>
+                    <input type="range" id="adv_curvature" min="0.1" max="4.0" value="1.0" step="0.01">
+                </div>
+                <div class="control-group">
+                    <label title="% of segments that stay at Peak before decaying">Sustain (Plateau) <span id="val_sustain" class="val-highlight">0.0</span></label>
+                    <input type="range" id="adv_sustain" min="0.0" max="0.8" value="0.0" step="0.01">
+                </div>
+                <div class="control-group">
+                    <label title="Minimum strength relative to Peak">Floor (Min Strength) <span id="val_floor" class="val-highlight">0.1</span></label>
+                    <input type="range" id="adv_floor" min="0.0" max="1.0" value="0.1" step="0.05">
+                </div>
+                <div class="control-group">
+                    <label title="Alternates strength up/down">Zig-Zag Amount <span id="val_zigzag" class="val-highlight">0.0</span></label>
+                    <input type="range" id="adv_zigzag" min="0.0" max="1.0" value="0.0" step="0.01">
+                </div>
             </div>
 
             <div class="stats">
@@ -131,6 +214,12 @@
                 <div class="legend-box"></div>
                 <span>Safe Zone (Str < 1.6, Time < 37%)</span>
             </div>
+
+            <div class="btn-group">
+                <button id="btn-reset">Reset Defaults</button>
+                <button id="btn-export">Copy Recipe</button>
+            </div>
+            <div id="copy-notice">Paste result into <code>js/presets.json</code></div>
         </div>
 
         <!-- GRAPH -->
@@ -141,35 +230,77 @@
 
 <script>
     // ==========================================
-    // 1. LOGIC
+    // 1. LOGIC ENGINE
     // ==========================================
-    function calculateCurve(steps, num_segments, chaos_factor, strength_scale) {
+    function calculateCurve(params) {
+        const { steps, num_segments, chaos, scale, curvature, sustain, floor, zigzag } = params;
+
         const step_len = 1.0 / Math.max(1, steps);
+        
+        // 1. Calculate Limits based on Chaos
         const min_duration = step_len * 1.5;
         const max_duration = 0.60;
-        let target_duration = min_duration + (max_duration - min_duration) * chaos_factor;
+        let target_duration = min_duration + (max_duration - min_duration) * chaos;
         target_duration = Math.min(target_duration, 1.0);
 
         const min_peak = 2.0;
         const max_peak = 20.0;
-        const peak_strength = min_peak + (max_peak - min_peak) * chaos_factor;
+        const peak_strength = min_peak + (max_peak - min_peak) * chaos;
 
         const chunk_size = target_duration / num_segments;
         const graphData = [];
 
         let current_time = 0.0;
+        let foundPeak = 0;
 
+        // 2. Generate Segments with Advanced Math
         for (let i = 0; i < num_segments; i++) {
             const start = current_time;
             const end = current_time + chunk_size;
-            const progress = (num_segments > 1) ? (i / (num_segments - 1)) : 0.0;
-            const segment_strength = peak_strength * (1.0 - (progress * 0.9));
-            const final_strength = segment_strength * strength_scale;
+            
+            // Normalized Progress (0.0 to 1.0)
+            let progress = (num_segments > 1) ? (i / (num_segments - 1)) : 0.0;
+
+            let raw_strength;
+
+            // A. SUSTAIN LOGIC
+            // If we are within the sustain period, hold peak
+            if (progress < sustain) {
+                raw_strength = peak_strength;
+            } else {
+                // Remap progress to 0.0-1.0 covering only the decay part
+                // e.g., if sustain is 0.5, current progress 0.6 becomes 0.2 (of the remaining half)
+                // Actually simpler: just re-normalize progress relative to sustain
+                let decay_progress = (progress - sustain) / (1.0 - sustain);
+                
+                // B. CURVATURE & FLOOR LOGIC
+                // Linear: (1 - p)
+                // Curved: (1 - p)^curvature
+                const curve_val = Math.pow(1.0 - decay_progress, curvature);
+                
+                // Floor logic: Scale between Floor and Peak
+                const floor_val = peak_strength * floor;
+                raw_strength = floor_val + (peak_strength - floor_val) * curve_val;
+            }
+
+            // C. ZIG-ZAG LOGIC
+            // If zigzag > 0, we fluctuate. 
+            // Even segments go up, Odd segments go down relative to curve
+            if (zigzag > 0) {
+                const direction = (i % 2 === 0) ? 1 : -1;
+                const offset = raw_strength * zigzag * 0.3; // 30% fluctuation max
+                raw_strength += (offset * direction);
+            }
+
+            // D. FINAL SCALE
+            const final_strength = Math.max(0, raw_strength * scale);
+            if(final_strength > foundPeak) foundPeak = final_strength;
 
             graphData.push({ x: start, y: final_strength });
             graphData.push({ x: end, y: final_strength });
             current_time = end;
         }
+        
         graphData.push({ x: current_time, y: 0 });
         graphData.push({ x: 1.0, y: 0 });
 
@@ -177,13 +308,13 @@
             data: graphData,
             meta: {
                 duration: target_duration,
-                peak: peak_strength * strength_scale
+                peak: foundPeak // Use actual peak including zigzag
             }
         };
     }
 
     // ==========================================
-    // 2. CHART PLUGINS
+    // 2. CHART SETUP
     // ==========================================
     const ctx = document.getElementById('noiseChart').getContext('2d');
 
@@ -195,33 +326,31 @@
 
             ctx.save();
 
-            // --- A. Draw Safe Zone ---
+            // Safe Zone
             const safeTime = 0.37;
             const safeStrength = 16.45;
-
             const xStart = x.getPixelForValue(0);
             const xEnd = x.getPixelForValue(safeTime);
             const yStart = y.getPixelForValue(safeStrength);
             const yEnd = y.getPixelForValue(0);
 
+            const safeYTop = Math.max(yStart, top); 
             const rectW = xEnd - xStart;
-            const rectH = yEnd - yStart;
+            const rectH = yEnd - safeYTop;
 
-            ctx.fillStyle = 'rgba(0, 255, 100, 0.05)';
-            ctx.fillRect(xStart, yStart, rectW, rectH);
+            if (rectH > 0) {
+                ctx.fillStyle = 'rgba(0, 255, 100, 0.05)';
+                ctx.fillRect(xStart, safeYTop, rectW, rectH);
+                ctx.strokeStyle = 'rgba(0, 255, 100, 0.4)';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([4, 4]);
+                ctx.strokeRect(xStart, safeYTop, rectW, rectH);
+                ctx.fillStyle = 'rgba(0, 255, 100, 0.8)';
+                ctx.font = '11px Arial';
+                ctx.fillText("SAFE ZONE", xStart + 5, safeYTop - 5);
+            }
 
-            ctx.strokeStyle = 'rgba(0, 255, 100, 0.4)';
-            ctx.lineWidth = 1;
-            ctx.setLineDash([4, 4]);
-            ctx.strokeRect(xStart, yStart, rectW, rectH);
-
-            // Label
-            ctx.fillStyle = 'rgba(0, 255, 100, 0.8)';
-            ctx.font = '11px Arial';
-            ctx.fillText("SAFE ZONE", xStart + 5, yStart - 5);
-
-
-            // --- B. Draw Step Grid ---
+            // Grid
             ctx.strokeStyle = '#444'; 
             ctx.lineWidth = 1;
             ctx.setLineDash([2, 4]);
@@ -230,29 +359,20 @@
             for (let i = 1; i < steps; i++) {
                 const xVal = i * stepSize;
                 const xPos = x.getPixelForValue(xVal);
-                
-                // Don't draw outside chart area
                 if(xPos > right) break;
-
                 ctx.beginPath();
                 ctx.moveTo(xPos, top);
                 ctx.lineTo(xPos, bottom);
                 ctx.stroke();
-
-                // Step number
                 ctx.fillStyle = '#666';
                 ctx.font = '10px Arial';
                 ctx.textAlign = 'center';
                 ctx.fillText(i, xPos, bottom + 12);
             }
-
             ctx.restore();
         }
     };
 
-    // ==========================================
-    // 3. CHART INIT
-    // ==========================================
     const chart = new Chart(ctx, {
         type: 'scatter',
         data: {
@@ -274,95 +394,110 @@
             animation: { duration: 0 },
             scales: {
                 x: {
-                    type: 'linear',
-                    min: 0,
-                    max: 1,
+                    type: 'linear', min: 0, max: 1,
                     title: { display: true, text: 'Generation Progress (0.0 to 1.0)' },
-                    grid: { display: false } // Custom grid
+                    grid: { display: false }
                 },
                 y: {
-                    min: 0,
-                    max: 25, // Fixed max to make visual comparison stable
+                    min: 0, max: 25,
                     title: { display: true, text: 'Strength' },
                     grid: { color: '#333' }
                 }
             },
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    mode: 'nearest',
-                    intersect: false,
-                    callbacks: {
-                        label: (context) => `Strength: ${context.parsed.y.toFixed(2)}`
-                    }
-                }
-            }
+            plugins: { legend: { display: false } }
         },
         plugins: [backgroundPlugins]
     });
 
     // ==========================================
-    // 4. UI INTERACTION
+    // 3. UI HANDLING
     // ==========================================
     const inputs = {
         steps: document.getElementById('steps'),
         num_segments: document.getElementById('num_segments'),
-        chaos_factor: document.getElementById('chaos_factor'),
-        strength_scale: document.getElementById('strength_scale')
+        chaos: document.getElementById('chaos_factor'),
+        scale: document.getElementById('strength_scale'),
+        // Advanced
+        curvature: document.getElementById('adv_curvature'),
+        sustain: document.getElementById('adv_sustain'),
+        floor: document.getElementById('adv_floor'),
+        zigzag: document.getElementById('adv_zigzag'),
     };
 
     const displays = {
         steps: document.getElementById('val_steps'),
         num_segments: document.getElementById('val_segments'),
-        chaos_factor: document.getElementById('val_chaos'),
-        strength_scale: document.getElementById('val_scale'),
+        chaos: document.getElementById('val_chaos'),
+        scale: document.getElementById('val_scale'),
+        curvature: document.getElementById('val_curve'),
+        sustain: document.getElementById('val_sustain'),
+        floor: document.getElementById('val_floor'),
+        zigzag: document.getElementById('val_zigzag'),
         
         calc_duration: document.getElementById('calc_duration'),
         calc_peak: document.getElementById('calc_peak'),
         calc_type: document.getElementById('calc_type')
     };
 
+    function getParams() {
+        return {
+            steps: parseInt(inputs.steps.value),
+            num_segments: parseInt(inputs.num_segments.value),
+            chaos: parseFloat(inputs.chaos.value),
+            scale: parseFloat(inputs.scale.value),
+            curvature: parseFloat(inputs.curvature.value),
+            sustain: parseFloat(inputs.sustain.value),
+            floor: parseFloat(inputs.floor.value),
+            zigzag: parseFloat(inputs.zigzag.value),
+        };
+    }
+
     function update() {
-        const steps = parseInt(inputs.steps.value);
-        const segments = parseInt(inputs.num_segments.value);
-        const chaos = parseFloat(inputs.chaos_factor.value);
-        const scale = parseFloat(inputs.strength_scale.value);
+        const p = getParams();
 
-        displays.steps.innerText = steps;
-        displays.num_segments.innerText = segments;
-        displays.chaos_factor.innerText = chaos.toFixed(2);
-        displays.strength_scale.innerText = scale.toFixed(1);
+        // Update Labels
+        displays.steps.innerText = p.steps;
+        displays.num_segments.innerText = p.num_segments;
+        displays.chaos.innerText = p.chaos.toFixed(2);
+        displays.scale.innerText = p.scale.toFixed(1);
+        displays.curvature.innerText = p.curvature.toFixed(1);
+        displays.sustain.innerText = p.sustain.toFixed(1);
+        displays.floor.innerText = p.floor.toFixed(2);
+        displays.zigzag.innerText = p.zigzag.toFixed(1);
 
-        const result = calculateCurve(steps, segments, chaos, scale);
+        // Calculate
+        const result = calculateCurve(p);
 
+        // Stats
         const durPercent = (result.meta.duration * 100).toFixed(0);
-        const stepsCovered = (result.meta.duration * steps).toFixed(1);
-        
+        const stepsCovered = (result.meta.duration * p.steps).toFixed(1);
         displays.calc_duration.innerText = `${durPercent}% (${stepsCovered} steps)`;
         displays.calc_peak.innerText = result.meta.peak.toFixed(2);
         
-        // Warn if outside safe zone
+        // Scale Y
+        const newMax = Math.max(25, result.meta.peak + 5);
+        chart.options.scales.y.max = newMax;
+
+        // Type Logic
         const peak = result.meta.peak;
         const dur = result.meta.duration;
         let typeText = "Balanced";
-        let color = "#00ff66";
+        let color = "#ddd";
         
-		if (peak >= 16.44 && dur <= 0.36) {
-            typeText = "Chaotic";
-            color = "#FFBF00";
-        } else if (peak <= 16.44 && dur >= 0.36) {
-            typeText = "Chaotic";
-            color = "#FFBF00";
-        } else if (peak >= 16.44 && dur >= 0.36) {
-            typeText = "High Chaos";
-            color = "#ff5555";
-        } else if (chaos > 0.7) {
-            typeText = "High Chaos";
-            color = "#ff5555";
+        // Limits
+        const LIMIT_PEAK = 16.45;
+        const LIMIT_DUR = 0.37;
+
+        const isPeakUnsafe = peak >= LIMIT_PEAK;
+        const isDurUnsafe = dur >= LIMIT_DUR;
+
+        if (isPeakUnsafe && isDurUnsafe) {
+             typeText = "High Chaos 🔴";
+        } else if (isPeakUnsafe || isDurUnsafe) {
+             typeText = "Chaotic 🟠";
         } else {
-			typeText = "Balanced";
-			color = "#00ff66";
-		}
+             typeText = "Balanced 🟢";
+        }
 
         displays.calc_type.innerText = typeText;
         displays.calc_type.style.color = color;
@@ -370,6 +505,69 @@
         chart.data.datasets[0].data = result.data;
         chart.update();
     }
+
+    // --- BUTTONS ---
+    document.getElementById('btn-adv').addEventListener('click', () => {
+        document.getElementById('adv-panel').classList.toggle('show');
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', () => {
+        inputs.steps.value = 12;
+        inputs.num_segments.value = 3;
+        inputs.chaos.value = 0.5;
+        inputs.scale.value = 1.0;
+        // Reset Advanced
+        inputs.curvature.value = 1.0;
+        inputs.sustain.value = 0.0;
+        inputs.floor.value = 0.1;
+        inputs.zigzag.value = 0.0;
+        update();
+    });
+
+    document.getElementById('btn-export').addEventListener('click', () => {
+        // Reuse the exact data points from the chart for the export
+        // This ensures what you see is EXACTLY what you get
+        const p = getParams();
+        const result = calculateCurve(p);
+        const data = result.data;
+
+        // Filter data points: 
+        // chart data has 2 points per segment (start, end). 
+        // We only need the "End" point of every segment for the tuple list.
+        // Data format: [Start1, End1, Start2, End2, ..., TailStart, TailEnd]
+        // We want every odd index up to the tail.
+        
+        let parts = [];
+        
+        // The loop in calculation pushes 2 points per segment.
+        // So we have p.num_segments * 2 points representing the curve.
+        // Then 2 points for the tail (0 value).
+        
+        for(let i = 0; i < p.num_segments; i++) {
+            // Index of the "End" point for segment i is (i * 2) + 1
+            const point = data[(i * 2) + 1];
+            
+            // Clean rounding for JSON
+            const t = parseFloat(point.x.toFixed(3));
+            const s = parseFloat(point.y.toFixed(2));
+            
+            parts.push(`[${t}, ${s}]`);
+        }
+
+        const recipeStr = `"${p.steps}-Step: Custom": [${parts.join(", ")}]`;
+
+        navigator.clipboard.writeText(recipeStr).then(() => {
+            const btn = document.getElementById('btn-export');
+            const notice = document.getElementById('copy-notice');
+            const originalText = btn.innerText;
+            btn.innerText = "Copied!";
+            notice.style.opacity = "1";
+            setTimeout(() => {
+                btn.innerText = originalText;
+                notice.style.opacity = "0";
+            }, 4000);
+        });
+    });
 
     Object.values(inputs).forEach(el => el.addEventListener('input', update));
     update();
